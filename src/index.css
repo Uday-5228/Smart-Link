@@ -1,7 +1,5 @@
-/* ============================================
-   Smart Link Hub - Design System
-   Black/Green Theme with High Contrast
-   ============================================ */
+/* Smart Link Hub - Designing
+   Black/Green Theme with High Contrast */
 
 /* CSS Variables - Design Tokens */
 :root {
@@ -1110,3 +1108,4 @@ img {
 @media (min-width: 769px) {
   .hide-desktop { display: none !important; }
 }
+
