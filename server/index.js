@@ -9,7 +9,7 @@ import QRCode from 'qrcode'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const { Pool } = pg
 
-// Initialize Express
+// Initializing Express
 const app = express()
 
 // CORS configuration for production
@@ -22,13 +22,13 @@ const corsOptions = {
 app.use(cors(corsOptions))
 app.use(express.json())
 
-// Initialize PostgreSQL connection pool
+// Initializing PostgreSQL connection pool
 const pool = new Pool({
     connectionString: process.env.DATABASE_URL,
     ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
 })
 
-// Create tables
+// Creating tables
 const initDB = async () => {
     const client = await pool.connect()
     try {
@@ -79,16 +79,16 @@ const initDB = async () => {
                 timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
         `)
-        console.log('✅ Database tables initialized')
+        console.log('Database tables initialized')
     } finally {
         client.release()
     }
 }
 
-// Initialize database on startup
+// Initializing database on startup
 initDB().catch(err => console.error('Database init error:', err))
 
-// Simple password hashing (for demo - use bcrypt in production)
+// Password hashing
 const hashPassword = (password) => {
     return Buffer.from(password).toString('base64')
 }
@@ -97,7 +97,7 @@ const verifyPassword = (password, hash) => {
     return hashPassword(password) === hash
 }
 
-// Auth middleware
+// Authentication middleware
 const authenticate = async (req, res, next) => {
     const userId = req.headers.authorization?.replace('Bearer ', '') || req.query.authorization
     if (!userId) {
@@ -115,9 +115,7 @@ const authenticate = async (req, res, next) => {
     }
 }
 
-// =====================
-// AUTH ROUTES
-// =====================
+// Authentication Routes
 
 app.post('/api/auth/register', async (req, res) => {
     const { email, password, name } = req.body
@@ -173,9 +171,7 @@ app.post('/api/auth/login', async (req, res) => {
     }
 })
 
-// =====================
-// HUB ROUTES
-// =====================
+// Hub Routes
 
 app.get('/api/hubs', authenticate, async (req, res) => {
     try {
@@ -212,7 +208,6 @@ app.post('/api/hubs', authenticate, async (req, res) => {
     try {
         await client.query('BEGIN')
 
-        // Check slug uniqueness
         const existing = await client.query('SELECT id FROM hubs WHERE slug = $1', [slug])
         if (existing.rows.length > 0) {
             await client.query('ROLLBACK')
@@ -226,7 +221,7 @@ app.post('/api/hubs', authenticate, async (req, res) => {
             [hubId, req.user.id, slug, title, description || null, theme || 'default']
         )
 
-        // Insert links
+        // Inserting links
         if (links && links.length > 0) {
             for (const link of links) {
                 const linkId = uuidv4()
@@ -235,7 +230,7 @@ app.post('/api/hubs', authenticate, async (req, res) => {
                     [linkId, hubId, link.title, link.url, link.icon || '🔗', link.position ?? 0, link.isActive !== false]
                 )
 
-                // Insert rules for this link
+                // Inserting rules for the link
                 if (link.rules && link.rules.length > 0) {
                     for (const rule of link.rules) {
                         await client.query(
@@ -283,7 +278,7 @@ app.get('/api/hubs/:id', authenticate, async (req, res) => {
             ORDER BY l.position ASC
         `, [hub.id])
 
-        // Parse rules JSON
+        // Parsing rules using JSON
         const linksWithRules = linksResult.rows.map(link => ({
             ...link,
             isActive: link.is_active,
@@ -320,7 +315,7 @@ app.put('/api/hubs/:id', authenticate, async (req, res) => {
 
         const hub = hubResult.rows[0]
 
-        // Check slug uniqueness (excluding current hub)
+        // Checking slug uniqueness (excluding current hub)
         if (slug && slug !== hub.slug) {
             const existing = await client.query(
                 'SELECT id FROM hubs WHERE slug = $1 AND id != $2',
@@ -332,13 +327,13 @@ app.put('/api/hubs/:id', authenticate, async (req, res) => {
             }
         }
 
-        // Update hub
+        // Updating hub
         await client.query(
             'UPDATE hubs SET title = $1, slug = $2, description = $3, theme = $4 WHERE id = $5',
             [title, slug, description, theme, hubId]
         )
 
-        // Update links - delete existing and re-insert
+        // Updating links - delete existing and re-insert
         if (links) {
             await client.query('DELETE FROM links WHERE hub_id = $1', [hubId])
 
@@ -390,9 +385,7 @@ app.delete('/api/hubs/:id', authenticate, async (req, res) => {
     }
 })
 
-// =====================
-// PUBLIC HUB ROUTE
-// =====================
+// Public Hub Route
 
 app.get('/api/public/:slug', async (req, res) => {
     try {
@@ -416,7 +409,7 @@ app.get('/api/public/:slug', async (req, res) => {
             ORDER BY l.position ASC
         `, [hub.id])
 
-        // Parse rules and filter based on context
+        // Parsing rules and filter based on context
         const deviceType = req.query.device || 'desktop'
         const currentHour = new Date().getHours()
 
@@ -426,11 +419,11 @@ app.get('/api/public/:slug', async (req, res) => {
             // If no rules, always show
             if (rules.length === 0) return true
 
-            // Check each rule
+            // Checking each rule
             for (const rule of rules) {
                 const config = typeof rule.config === 'string' ? JSON.parse(rule.config) : rule.config
 
-                // Time-based rule
+                // Time based rule
                 if (rule.type === 'time') {
                     const { startHour, endHour } = config
                     if (currentHour < startHour || currentHour >= endHour) {
@@ -438,7 +431,7 @@ app.get('/api/public/:slug', async (req, res) => {
                     }
                 }
 
-                // Device-based rule
+                // Device based rule
                 if (rule.type === 'device') {
                     const { devices } = config
                     if (devices && devices.length > 0 && !devices.includes(deviceType)) {
@@ -470,9 +463,7 @@ app.get('/api/public/:slug', async (req, res) => {
     }
 })
 
-// =====================
-// ANALYTICS ROUTES
-// =====================
+// Analytics Rules
 
 app.post('/api/analytics/track', async (req, res) => {
     const { slug, linkId, eventType, deviceType, timestamp } = req.body
@@ -500,7 +491,7 @@ app.get('/api/analytics/:hubId', authenticate, async (req, res) => {
     const range = req.query.range || '7d'
 
     try {
-        // Verify ownership
+        // Verifying ownership
         const hubResult = await pool.query(
             'SELECT * FROM hubs WHERE id = $1 AND user_id = $2',
             [hubId, req.user.id]
@@ -510,7 +501,7 @@ app.get('/api/analytics/:hubId', authenticate, async (req, res) => {
             return res.status(404).json({ error: 'Hub not found' })
         }
 
-        // Calculate date filter
+        // Calculating date filter
         let dateFilter = ''
         let dateFilterAnalytics = ''
         if (range === '24h') {
@@ -537,7 +528,7 @@ app.get('/api/analytics/:hubId', authenticate, async (req, res) => {
         `, [hubId])
         const totalClicks = parseInt(clicksResult.rows[0]?.count || 0)
 
-        // Link stats
+        // Link statistics
         const linkStatsResult = await pool.query(`
             SELECT l.id, l.title, l.url, l.icon, COUNT(a.id) as clicks
             FROM links l
@@ -556,7 +547,7 @@ app.get('/api/analytics/:hubId', authenticate, async (req, res) => {
             ORDER BY count DESC
         `, [hubId])
 
-        // Daily stats
+        // Daily statistics
         const dailyResult = await pool.query(`
             SELECT 
                 DATE(timestamp) as date,
@@ -569,7 +560,7 @@ app.get('/api/analytics/:hubId', authenticate, async (req, res) => {
             LIMIT 7
         `, [hubId])
 
-        // Format daily stats with labels
+        // Formating daily statistics with labels
         const formattedDailyStats = dailyResult.rows.reverse().map(d => ({
             ...d,
             views: parseInt(d.views),
@@ -590,9 +581,8 @@ app.get('/api/analytics/:hubId', authenticate, async (req, res) => {
     }
 })
 
-// =====================
-// QR CODE GENERATION
-// =====================
+
+// QR code generation
 
 app.get('/api/hubs/:id/qr', authenticate, async (req, res) => {
     try {
@@ -639,9 +629,8 @@ app.get('/api/hubs/:id/qr', authenticate, async (req, res) => {
     }
 })
 
-// =====================
-// ANALYTICS EXPORT
-// =====================
+// Analytics export
+
 
 app.get('/api/analytics/:hubId/export', authenticate, async (req, res) => {
     const hubId = req.params.hubId
@@ -649,7 +638,7 @@ app.get('/api/analytics/:hubId/export', authenticate, async (req, res) => {
     const range = req.query.range || 'all'
 
     try {
-        // Verify ownership
+        // Verifying ownership
         const hubResult = await pool.query(
             'SELECT * FROM hubs WHERE id = $1 AND user_id = $2',
             [hubId, req.user.id]
@@ -661,7 +650,7 @@ app.get('/api/analytics/:hubId/export', authenticate, async (req, res) => {
 
         const hub = hubResult.rows[0]
 
-        // Calculate date filter
+        // Calculating date filter
         let dateFilter = ''
         let dateFilterAnalytics = ''
         if (range === '24h') {
@@ -675,7 +664,7 @@ app.get('/api/analytics/:hubId/export', authenticate, async (req, res) => {
             dateFilterAnalytics = "AND a.timestamp >= NOW() - INTERVAL '30 days'"
         }
 
-        // Get all analytics data
+        // Getting all analytics data
         const analyticsResult = await pool.query(`
             SELECT 
                 a.event_type,
@@ -691,11 +680,11 @@ app.get('/api/analytics/:hubId/export', authenticate, async (req, res) => {
 
         const analyticsData = analyticsResult.rows
 
-        // Get summary stats
+        // Getting summary statistics
         const totalViews = analyticsData.filter(a => a.event_type === 'visit').length
         const totalClicks = analyticsData.filter(a => a.event_type === 'click').length
 
-        // Get link stats
+        // Getting link stats
         const linkStatsResult = await pool.query(`
             SELECT l.title, l.url, COUNT(a.id) as clicks
             FROM links l
@@ -706,7 +695,7 @@ app.get('/api/analytics/:hubId/export', authenticate, async (req, res) => {
         `, [hubId])
 
         if (format === 'csv') {
-            // Generate CSV
+            // Generating CSV
             let csv = 'Smart Link Hub Analytics Report\n'
             csv += `Hub: ${hub.title}\n`
             csv += `Slug: ${hub.slug}\n`
@@ -734,7 +723,7 @@ app.get('/api/analytics/:hubId/export', authenticate, async (req, res) => {
             res.setHeader('Content-Disposition', `attachment; filename="${hub.slug}-analytics-${range}.csv"`)
             res.send(csv)
         } else {
-            // Return JSON
+            // Returning JSON
             res.json({
                 hub: {
                     title: hub.title,
@@ -758,14 +747,14 @@ app.get('/api/analytics/:hubId/export', authenticate, async (req, res) => {
     }
 })
 
-// Serve static files in production
+// Serving static files in production
 if (process.env.NODE_ENV === 'production') {
     const distPath = path.join(__dirname, '..', 'dist')
 
     // Serve static assets
     app.use(express.static(distPath))
 
-    // Handle client-side routing - serve index.html for non-API routes
+    // Handling client side routing, serve index.html for non-API routes
     app.get('*', (req, res) => {
         if (!req.path.startsWith('/api')) {
             res.sendFile(path.join(distPath, 'index.html'))
@@ -773,8 +762,9 @@ if (process.env.NODE_ENV === 'production') {
     })
 }
 
-// Start server
+// Starting server
 const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`)
 })
+
