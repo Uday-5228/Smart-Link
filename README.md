@@ -1,4 +1,4 @@
-# ⚡ Smart Link Hub
+#  Smart Link Hub
 
 > A modern, full-stack link management platform for creating dynamic, personalized link pages with smart display rules, real-time analytics, and QR code generation.
 
@@ -6,7 +6,7 @@
 
 ---
 
-## 🌐 Deployment Details
+##  Deployment Details
 
 | Service | URL |
 |---------|-----|
@@ -16,7 +16,7 @@
 
 ---
 
-## 📋 Solution Overview
+##  Solution Overview
 
 **Smart Link Hub** solves the problem of creating and managing personalized link pages (similar to Linktree) with advanced features:
 
@@ -38,38 +38,38 @@ Smart Link Hub provides:
 
 ---
 
-## ✨ Features
+##  Features
 
-### 📱 Link Hub Management
+###  Link Hub Management
 - Create unlimited personalized link pages
 - Drag-and-drop link reordering
 - Custom icons for each link (emoji support)
 - Enable/disable links without deleting
 
-### 🧠 Smart Display Rules
+###  Smart Display Rules
 - **Time-based rules**: Show links only during specific hours (e.g., business hours only)
 - **Device-based rules**: Display different links for mobile, tablet, or desktop users
 
-### 📊 Real-Time Analytics Dashboard
+###  Real-Time Analytics Dashboard
 ![Dashboard](screenshots/dashboard.png)
 - Track page views and link clicks
 - Device breakdown visualization
 - Interactive charts with daily/weekly/monthly views
 - Export analytics data as CSV
 
-### 🎨 Custom Themes
+###  Custom Themes
 - Default (Black/Green)
 - Midnight Purple
 - Ocean Teal
 - Sunset Red
 
-### 📲 QR Code Generation
+###  QR Code Generation
 - Generate QR codes for any hub
 - Download as PNG for print materials
 
 ---
 
-## 🛠️ Tech Stack
+##  Tech Stack
 
 | Layer | Technology |
 |-------|------------|
@@ -82,7 +82,7 @@ Smart Link Hub provides:
 
 ---
 
-## 📁 Project Structure
+##  Project Structure
 
 ```
 smart-link-hub/
@@ -110,7 +110,7 @@ smart-link-hub/
 
 ---
 
-## 🚀 Setup & Installation
+##  Setup & Installation
 
 ### Prerequisites
 - Node.js 18+
@@ -169,7 +169,7 @@ See [Deployment Guide](#-deployment-on-render) below.
 
 ---
 
-## 📡 API Documentation
+##  API Documentation
 
 Full API documentation is available in [docs/API.md](docs/API.md).
 
@@ -205,7 +205,7 @@ Full API documentation is available in [docs/API.md](docs/API.md).
 
 ---
 
-## ☁️ Deployment on Render
+##  Deployment on Render
 
 ### Step 1: Create PostgreSQL Database
 1. Go to [render.com](https://render.com) → New → PostgreSQL
@@ -231,7 +231,7 @@ Full API documentation is available in [docs/API.md](docs/API.md).
 
 ---
 
-## 📸 Screenshots
+##  Screenshots
 
 ### Landing Page
 ![Landing](screenshots/landing.png)
@@ -244,7 +244,7 @@ Full API documentation is available in [docs/API.md](docs/API.md).
 
 ---
 
-## 📝 Environment Variables
+##  Environment Variables
 
 ### Backend
 | Variable | Required | Description |
@@ -261,7 +261,7 @@ Full API documentation is available in [docs/API.md](docs/API.md).
 
 ---
 
-## 🧪 Usage Instructions
+##  Usage Instructions
 
 ### Creating Your First Hub
 
@@ -282,7 +282,7 @@ Full API documentation is available in [docs/API.md](docs/API.md).
 
 ---
 
-## 📜 Git Commit Practices
+##  Git Commit Practices
 
 This project follows conventional commit practices for clear and trackable history.
 
@@ -324,7 +324,7 @@ chore: Update dependencies
 
 ---
 
-## 🤝 Contributing
+##  Contributing
 
 1. Fork the repository
 2. Create feature branch (`git checkout -b feature/NewFeature`)
@@ -334,15 +334,12 @@ chore: Update dependencies
 
 ---
 
-## 👤 Author
+##  Authors
 
 **Uday Patil**, 
 **Shubham Nemade**, 
 **Shivraj Patil**
 
 ---
-
-⭐ Star this repo if you found it helpful!
-
-
-
+Thank you !
+Star this repo if you found it helpful!
