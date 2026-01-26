@@ -1,2 +1,2 @@
-// API Base URL - set via environment variable for production
+// API Base URL
 export const API_URL = import.meta.env.VITE_API_URL || ''
